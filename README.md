@@ -24,7 +24,7 @@ S.upload(filepath, display=True)
 An upload in progress...
 ![Running](https://github.com/kafitz/pushSFTP/blob/master/media/part1.png)
 Complete!
-![Complete](https://github.com/kafitz/pushSFTP/blob/master/media/part1.png)
+![Complete](https://github.com/kafitz/pushSFTP/blob/master/media/part2.png)
 
 
 #### TO DO
