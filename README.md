@@ -17,7 +17,7 @@ PushSFTP handles the rest when setting up the class instance.
 from push_sftp import SFTP
 
 S = SFTP()
-filepath = './blob.dat'
+filepath = './testfile.dat'
 S.upload(filepath, display=True)
 
 ```
