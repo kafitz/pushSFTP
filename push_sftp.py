@@ -13,6 +13,21 @@ import pysftp
 from etaprogress.progress import ProgressBarWget
 import config
 
+# decorators
+def setupteardown(func):
+    def _decorator(self, bytes, file_size):
+        # setup
+        if not self.byes_written:
+            self.bar = ProgressBarWget(file_size)
+        # execute
+        func(self, bytes, file_size)
+        sys.stdout.flush()
+        # teardown
+        if self.byes_written == file_size:
+            self.byes_written = 0
+            self.bar = None
+    return _decorator
+
 class SFTP:
     '''Uploads files to config server and directory'''
     def __init__(self):
@@ -59,20 +74,6 @@ def human_readable(num, suffix='B'):
         num /= 1024.0
     size = {'num': num, 'u': 'Y', 's': suffix}
     return '{num:.1f}{u}{s}'.format(**size)
-
-def setupteardown(func):
-    def _decorator(self, bytes, file_size):
-        # setup
-        if not self.byes_written:
-            self.bar = ProgressBarWget(file_size)
-        # execute
-        func(self, bytes, file_size)
-        sys.stdout.flush()
-        # teardown
-        if self.byes_written == file_size:
-            self.byes_written = 0
-            self.bar = None
-    return _decorator
 
 if __name__ == '__main__':
     S = SFTP()
