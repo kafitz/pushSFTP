@@ -8,7 +8,6 @@ from __future__ import print_function
 import os
 import sys
 import time
-import functools
 import pysftp
 from etaprogress.progress import ProgressBarWget
 import config
@@ -17,7 +16,7 @@ import config
 def setupteardown(func):
     def _decorator(self, bytes, file_size):
         # setup
-        if not self.byes_written:
+        if not self.bytes_written:
             self.bar = ProgressBarWget(file_size)
         # execute
         func(self, bytes, file_size)
@@ -28,7 +27,7 @@ def setupteardown(func):
             self.bar = None
     return _decorator
 
-class SFTP:
+class SFTPClient:
     '''Uploads files to config server and directory'''
     def __init__(self):
         self.config = config.Config()
@@ -48,7 +47,13 @@ class SFTP:
     def upload(self, content, display=True):
         '''Upload content file and handle stdout display'''
         with pysftp.Connection(**self.config.SFTP) as conn:
-            with conn.cd(self.config.file_directory):
+            # mirror the local directory structure on remote host
+            local_dir = os.path.dirname(content)
+            remote_dir = os.path.join(self.config.file_directory, local_dir)
+            conn.mkdirs(remote_dir)
+
+            # cd to remote destination dir and put file
+            with conn.cd(remote_dir):
                 if display:
                     callback = self.progress
                     start = time.time()
@@ -59,7 +64,7 @@ class SFTP:
         if callback:
             end = time.time()
             duration = end - start
-            print()
+            print() # clear bar sysout with newline
             print('Upload finished in {t:.2f}s, {d} transferred'.format(
                 t=duration, 
                 d=human_readable(self.last_file_size)
@@ -76,6 +81,6 @@ def human_readable(num, suffix='B'):
     return '{num:.1f}{u}{s}'.format(**size)
 
 if __name__ == '__main__':
-    S = SFTP()
+    S = SFTPClient()
     S.upload('testfile.dat', display=True)
 
